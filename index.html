@@ -1,0 +1,498 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Erste Hilfe Soundboard">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Erste Hilfe Soundboard</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<div id="page">
+    <div id="soundcheck" style="display:none">
+        <audio id="playSoundBox" src="" controls></audio>
+    </div>
+    <aside>
+        <h1>Notruf 1<span style="margin-right:-9px;margin-left:-15px">1</span>2</h1>
+        <div id="phoneTimer">Kein Anruf verbunden.</div>
+
+        <!--        <div class="callerId">-->
+        <!--            <img class="avatar" src="https://thispersondoesnotexist.com">-->
+        <!--        </div>-->
+
+        <!-- Disponent Dropdown Auswahl -->
+        <div>
+            <label for="disponentSelect">Disponent: </label>
+            <select id="disponentSelect">
+                <option value="Till">Till</option>
+                <option value="Dominik">Dominik</option>
+                <option value="Jordan">Jordan</option>
+                <option value="Marek">Marek</option>
+            </select>
+        </div>
+
+        <!-- Toggle Switch -->
+        <div>
+            <label for="toggleSwitch">Auto-Wechsel: </label>
+            <input type="checkbox" id="toggleSwitch" checked>
+        </div>
+
+        <div class="gap"></div>
+
+        <!-- Playing bar -->
+        <div class="playingBar">
+            <div class="playInfo">
+                <div class="char" char="A">A</div>
+                <div class="text"><h2>Erstickung</h2>
+                    <p>Heimlich Handgriff anweisen</p></div>
+                <div class="gap"></div>
+                <div class="playing"></div>
+            </div>
+            <div class="progressBar">
+                <div class="progress"></div>
+            </div>
+        </div>
+    </aside>
+    <main>
+        <div id="soundboard"></div>
+    </main>
+</div>
+
+<!--<img src="icon.svg" alt="Johanniter" style="height: 60px;position:absolute; top: 30px; right: 30px"/>-->
+
+<!-- Timer -->
+
+
+<script>
+
+    let soundcheck = false;
+
+    /* EQ for phone */
+    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let highPassFilter = audioContext.createBiquadFilter();
+    let lowPassFilter = audioContext.createBiquadFilter();
+
+    // Set up the filters for the telephone effect
+    highPassFilter.type = 'highpass';
+    highPassFilter.frequency.value = 600;
+
+    lowPassFilter.type = 'lowpass';
+    lowPassFilter.frequency.value = 3800;
+
+    // Connect the filters in series
+    highPassFilter.connect(lowPassFilter);
+
+    // sound data
+    const soundData = {
+        "Struktur": [
+            {"title": "Aufbau", "char": "1", "filename": "../beep.mp3"},
+            {"title": "Schleife", "char": "2", "filename": "../verbindungsaufbau.mp3"},
+            {"title": "Begrüßung", "char": "3", "filename": "3.mp3"},
+            {"title": "Etage", "char": "4", "filename": "4.mp3"},
+            {"title": "Stichwort", "char": "5", "filename": "5.mp3"},
+        ],
+
+        "Sehen": [
+            {"title": "Gefahren", "filename": "g.mp3", "char": "G"},
+            {"title": "Zustand", "filename": "z.mp3", "char": "Z"},
+            {"title": "Wach", "filename": "w.mp3", "char": "W"},
+            {"title": "Atmung", "filename": "l.mp3", "char": "L"},
+            {"title": "Verletzungen", "filename": "v.mp3", "char": "V"},
+        ],
+        "Anweisung": [
+            // {"title": "Einleitung","char":"7", "filename": "bleiben.mp3"},
+            null,
+            // X
+
+            // A
+            {"title": "SSL", "char": "A", "filename": "a1.mp3"},
+            {"title": "Erstickung", "char": "A", "filename": "a2.mp3"},
+            null,
+
+            // B
+            {"title": "Allergisch", "char": "B", "filename": "b1.mp3"},
+            {"title": "Asthma", "char": "B", "filename": "b2.mp3"},
+            {"title": "Hypervent.", "char": "B", "filename": "b3.mp3"},
+            null,
+
+            // C
+            {"title": "CPR", "char": "C", "filename": "c1.mp3"},
+            {"title": "Fraktur", "char": "C", "filename": "c2.mp3"},
+            {"title": "Herzinfarkt", "char": "C", "filename": "c3.mp3"},
+            {"title": "Druckverband", "char": "X", "filename": "x.mp3"},
+            null,
+
+            // D
+            {"title": "Krampf", "char": "D", "filename": "d1.mp3"},
+            {"title": "Unterzucker", "char": "D", "filename": "d2.mp3"},
+            {"title": "Schlaganfall", "char": "D", "filename": "d3.mp3"},
+            null,
+
+            // E
+            {"title": "Brandwunde", "char": "E", "filename": "e1.mp3"},
+            // {"title": "Sonnenstich", "char": "E", "filename": "e2.mp3"},
+            {"title": "Sonne", "char": "E", "filename": "e3.mp3"},
+            {"title": "Hypothermie", "char": "E", "filename": "e4.mp3"},
+            {"title": "Erfrierung", "char": "E", "filename": "e5.mp3"},
+
+        ],
+        "Besondere": [
+
+            // Gift
+            {"title": "Intox", "char": "I", "filename": "i.mp3"},
+
+            // Strom
+            {"title": "Strom", "char": "S", "filename": "s.mp3"},
+            {"title": "Unfall im Verkehr", "char": "U", "filename": "u.mp3"},
+
+            // Trauma
+            {"title": "Fall", "char": "F", "filename": "f.mp3"},
+            {"title": "Meldeanlage", "char": "M", "filename": "../bma.mp3"},
+        ],
+        "Schluss": [
+            {"title": "Auf Anfahrt", "char": "8", "filename": "8.mp3"},
+            {"title": "Auflegen", "char": "9", "filename": "9.mp3"},
+            {"title": "Beep", "char": "0", "filename": "../hangup.mp3"},
+            null,
+            {"title": "Funkloch (Space)", "char": "-", "filename": "-.mp3"},
+            {"title": "Anweisungen!", "char": "+", "filename": "+.mp3"},
+        ]
+
+    }
+
+    let callDuration = 0
+    let callRunning = false
+
+    let disponent = "Till";
+    const soundboardDiv = document.getElementById('soundboard');
+
+    for (const category in soundData) {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = category;
+        categoryDiv.appendChild(h2);
+
+        // add a class according to category but without spaces
+        categoryDiv.classList.add(category.replace(/\s/g, ''));
+
+        soundData[category].forEach(sound => {
+            // if sound is null, add a spacer
+            if (!sound) {
+                const spacer = document.createElement('div');
+                spacer.style.height = '0em';
+                categoryDiv.appendChild(spacer);
+                return;
+            }
+
+            const button = document.createElement('button');
+            // add .btn class
+            button.classList.add('btn');
+            button.textContent = sound.title;
+            button.setAttribute('filename', sound.filename);
+
+            if (sound.char) {
+                button.setAttribute('char', sound.char);
+            }
+            button.onclick = function () {
+                playSound(sound.filename, button, sound.char);
+            };
+            categoryDiv.appendChild(button);
+        });
+
+        soundboardDiv.appendChild(categoryDiv);
+    }
+
+    let currentAudio = null;
+    let playSoundBox = document.getElementById('playSoundBox');
+
+    function playSound(filename, button = null, char = null, index = null) {
+
+        // if file 1 or 3 ist played, reset call duration and start timer
+        if (['../beep.mp3', '3.mp3'].includes(filename)) {
+            callDuration = 0;
+            callRunning = true;
+
+            if (autoChange) {
+                disponent = getNextDisponent();
+                disponentSelect.value = disponent;
+            }
+        }
+
+        // and stop if 9 or 0 is played
+        if (['9.mp3', '../hangup.mp3'].includes(filename)) {
+            callRunning = false;
+        }
+
+        console.log('play sound', filename);
+
+        playSoundBox.pause();
+        playSoundBox.currentTime = 0;
+        // TODO: is it playing already?
+        // remove all playing classes from buttons
+        document.querySelectorAll('button').forEach(btn => btn.classList.remove('playing'));
+
+        // Use the audio context TODO not wprking in chrome
+        // try {
+        //     let source = audioContext.createMediaElementSource(playSoundBox);
+        //     source.connect(highPassFilter);
+        //     lowPassFilter.connect(audioContext.destination);
+        // } catch (e) {
+        //     console.log('error', e)
+        // }
+
+        // if playSoundBox already plays the sound, stop it
+        if (playSoundBox.src.replace(/\.\.\//g, '').includes(filename.replace(/\.\.\//g, ''))) {
+            playSoundBox.pause();
+            playSoundBox.currentTime = 0;
+            button?.classList.remove('playing');
+            return;
+        }
+
+        let currentAudio = playSoundBox;
+
+        // if no button, try to find it by its filename
+        if (!button)
+            button = document.querySelector('button[filename="' + filename + '"]');
+
+        // falls der Char A-F oder X ist, bitte spiele die datei bleiben.mp3 zuerst vollständig ab
+        if (['A', 'B', 'C', 'D', 'E', 'F', 'X'].includes(char)) {
+            currentAudio.src = 'voice/' + disponent + '/7.mp3';
+            currentAudio.play();
+            currentAudio.onended = function () {
+                currentAudio.src = 'voice/' + disponent + '/' + filename;
+                currentAudio.play();
+
+                // and stop when done
+                currentAudio.onended = function () {
+                    button?.classList.remove('playing');
+                    // and stop
+                    currentAudio.pause();
+                };
+            };
+        } else {
+            currentAudio.src = 'voice/' + disponent + '/' + filename;
+            currentAudio.play();
+
+            // add playing class
+            currentAudio.onended = function () {
+                button?.classList.remove('playing');
+            };
+
+        }
+        button?.classList.add('playing');
+
+        // currentAudio.volume = 3.5; // 1.5 times the original volume
+        currentAudio.loop = false;
+    }
+
+
+    // when i press esc, stop all sounds
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            if (currentAudio) {
+                currentAudio.pause();
+                document.querySelectorAll('button').forEach(btn => btn.classList.remove('playing'));
+            }
+        }
+    });
+
+
+    // ab hier die tastenkombinationen
+    // backspace stoppt alle sounds
+    // wenn ich A-E drücke, muss innerhalb von 1s eine nummer folgen, dann wird der n-te sound mit dem char gespielt
+    // wenn ich eine zahl drücke, ohne vorher A-E gedrückt zu haben, wird der sound mit der zahl als char gespielt
+    // wenn ich einen buchstaben drücke, der nicht A-E ist, wird der sound mit dem char gespielt
+    // während ich die leertaste drücke wird der equilizer schlechter gemacht (funkloch emulation), wenn ich wieder loslasse dann wieder so wie initial
+
+    let lastKey = null; // Last key pressed
+    let lastKeyPressedTime = null; // Time when the last key was pressed
+    let funklochEQ = {
+        lowpass: 5000,
+        highpass: 2800
+    };
+
+    // TODO: Tastenkombi Steuerung einfügen
+    document.addEventListener('keydown', function (event) {
+        // Backspace: stop all sounds
+        if (event.key === 'Backspace') {
+            if (currentAudio) {
+                currentAudio.pause();
+                document.querySelectorAll('button').forEach(btn => btn.classList.remove('playing'));
+            }
+        }
+        // Spacebar: Emulate bad equalizer
+        else if (event.key === ' ') {
+            return
+
+            // make up funny values for funklochEQ
+            funklochEQ.lowpass = Math.random() * 10000 + 1200;
+            funklochEQ.highpass = Math.random() * 10000 + 3000;
+
+            highPassFilter.frequency.value = funklochEQ.highpass;
+            lowPassFilter.frequency.value = funklochEQ.lowpass;
+        }
+        // A-E keys
+        else if (['A', 'B', 'C', 'D', 'E'].includes(event.key.toUpperCase())) {
+            lastKey = event.key.toUpperCase();
+            lastKeyPressedTime = Date.now();
+        }
+        // Numbers: 0-9
+        else if (/[0-9]/.test(event.key)) {
+            let delay = Date.now() - (lastKeyPressedTime || 0);
+            if (lastKey && delay <= 1000) {
+                playSoundByCharAndIndex(lastKey, parseInt(event.key) - 1);
+                lastKey = null;
+                lastKeyPressedTime = null;
+            } else {
+                playSoundByChar(event.key);
+            }
+        }
+        // Other letters
+        else {
+            playSoundByChar(event.key.toUpperCase());
+        }
+    });
+
+    document.addEventListener('keyup', function (event) {
+        // Reset EQ when space is released
+        if (event.key === ' ') {
+            highPassFilter.frequency.value = 600;
+            lowPassFilter.frequency.value = 3800;
+        }
+    });
+
+    function playSoundByCharAndIndex(char, index) {
+        let matchedSounds = [];
+        if (soundData["Anweisung"]) {
+            for (const sound of soundData["Anweisung"]) {
+                if (sound && sound.char === char) {
+                    matchedSounds.push(sound);
+                }
+            }
+        }
+
+        if (matchedSounds[index]) {
+            playSound(matchedSounds[index].filename, null, char, index);
+        }
+    }
+
+
+    function playSoundByChar(char) {
+        for (const category in soundData) {
+            for (const sound of soundData[category]) {
+                if (sound && sound.char === char) {
+                    playSound(sound.filename, null, char);
+                    return;
+                }
+            }
+        }
+    }
+
+
+    // Timer
+
+    setInterval(function () {
+        if (callRunning) {
+            callDuration++;
+        }
+        let minutes = Math.floor(callDuration / 60);
+        let seconds = callDuration % 60;
+        if (callRunning) {
+            document.getElementById('phoneTimer').textContent = "Verbunden. Dauer " + minutes + ':' + seconds.toString().padStart(2, '0');
+        } else if (callDuration > 0) {
+            document.getElementById('phoneTimer').textContent = "Anruf beendet. Dauer " + minutes + ':' + seconds.toString().padStart(2, '0');
+        }
+    }, 1000);
+
+
+    // Disponent Dropdown
+    const disponentSelect = document.getElementById('disponentSelect');
+    const toggleSwitch = document.getElementById('toggleSwitch');
+    let autoChange = true;
+
+    disponentSelect.addEventListener('change', function () {
+        disponent = disponentSelect.value;
+    });
+
+    toggleSwitch.addEventListener('change', function () {
+        autoChange = toggleSwitch.checked;
+    });
+
+    function getNextDisponent() {
+        const disponents = ['Till', 'Dominik', 'Jordan', 'Marek'];
+        let currentIndex = disponents.indexOf(disponent);
+        currentIndex = (currentIndex + 1) % disponents.length;
+        return disponents[currentIndex];
+    }
+
+    // Additionally, let's update the playing bar when something is played.
+    function updatePlayingBar(title, char, description) {
+        console.log('upda bar')
+
+        let playInfo = document.querySelector('.playInfo .text h2');
+        let playChar = document.querySelector('.playInfo .char');
+        let playDesc = document.querySelector('.playInfo .text p');
+        playInfo.textContent = 'Aktueller Titel';
+        playChar.textContent = char;
+        playDesc.textContent = description;
+
+        // We can also simulate the progress bar using a basic interval.
+        let progressBar = document.querySelector('.progressBar .progress');
+        if (playSoundBox) {
+            progressBar.style.width = "0%";  // Reset the progress bar
+            let updateInterval = setInterval(() => {
+                playSoundBox = document.getElementById('playSoundBox');
+                let progress = (playSoundBox.currentTime / playSoundBox.duration) * 100;
+                progressBar.style.width = progress + "%";
+                if (progress >= 100) clearInterval(updateInterval);  // Clear the interval when the sound finishes
+            }, 50);  // Update every 50ms
+        }
+    }
+
+    //
+    // currentAudio.addEventListener('play', () => {
+    //     if (!currentAudio) return;
+    //     updatePlayingBar(currentAudio.src.split('/').pop().replace('.mp3', ''), 'A', 'Some Description');  // Replace placeholders with actual values
+    // });
+
+    setInterval(function () {
+        updatePlayingBar(playSoundBox.src.split('/').pop().replace('.mp3', ''),
+            // get char from button
+            document.querySelector('button[filename="' + playSoundBox.src.split('/').pop() + '"]').getAttribute('char'),
+            // get title from button
+            document.querySelector('button[filename="' + playSoundBox.src.split('/').pop() + '"]').textContent
+        );
+    }, 1000)
+
+
+</script>
+<style>
+    @media (max-width: 992px) {
+        #page aside {
+            display: none;
+        }
+
+        #page main {
+            padding: 20px;
+            padding-top: 0;
+        }
+
+        #soundboard {
+            padding-bottom: 10px;
+        }
+
+        /* inside .category the buttons should be as grid */
+        .category {
+            /*display: grid;*/
+            /*box-sizing: border-box;*/
+            /*grid-template-columns: repeat(2, 1fr);*/
+            /*grid-gap: 10px;*/
+        }
+    }
+</style>
+</body>
+</html>

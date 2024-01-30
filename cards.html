@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Cards</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="cards-container">
+    <!-- Card with hover effect -->
+    <div class="card hover-effect">
+        <div class="card-image">
+            <img src="elderly-person.jpg" alt="Elderly person with caretaker">
+        </div>
+        <div class="card-content">
+            <h2 class="card-title">Pflege & Begleitung</h2>
+            <div class="card-description hidden">Damit Sie so lange wie möglich selbstbestimmt leben können, bieten wir Ihnen kompetent und zuverlässig die Pflege, die Sie benötigen.</div>
+            <button class="card-btn">Mehr erfahren</button>
+        </div>
+    </div>
+
+    <!-- Colored card -->
+    <div class="card colored">
+        <!-- Content here -->
+    </div>
+
+    <!-- Card for children and youth -->
+    <div class="card youth">
+        <!-- Content here -->
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    .cards-container {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px;
+    }
+
+    .card {
+        position: relative;
+        width: 300px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+    }
+
+    .card-image img {
+        width: 100%;
+        display: block;
+    }
+
+    /* ... (rest of the CSS styles) ... */
+
+    .card-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .card-title {
+        margin-top: -100px; /* Hide the title above the card initially */
+        transition: margin-top 0.5s ease; /* Animate the title coming down */
+    }
+
+    .card-btn {
+        position: absolute;
+        bottom: 20px; /* Position the button at the bottom of the card */
+        left: 20px;
+        /* ... (rest of the button styles) ... */
+    }
+
+    .card-description {
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+
+    .card:hover .card-title {
+        margin-top: 0; /* Bring the title into the card on hover */
+    }
+
+    .card:hover .card-description {
+        visibility: visible;
+        opacity: 1;
+        transition-delay: 0.3s; /* Delay the text appearance slightly */
+    }
+
+    /* ... (rest of the CSS styles) ... */
+    .card-btn:hover {
+        background-color: #003d82;
+    }
+
+    /* Specific styles for colored card */
+    .colored {
+        background-color: #f0f0f0; /* Example color */
+    }
+
+    /* Specific styles for youth card */
+    .youth {
+        /* Your specific styles here */
+    }
+
+</style>
+</body>
+</html>
